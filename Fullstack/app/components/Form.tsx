@@ -1,7 +1,7 @@
 import { sendMessage } from '../api/actions'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Send } from 'lucide-react'
+import { Send, Image, PlusCircle } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useEffect, useRef, useState } from 'react';
 import { useActionState } from 'react';
@@ -14,6 +14,8 @@ const Form = ({ selectedModel }: { selectedModel: string }) => {
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const [state, formAction, pending] = useActionState(sendMessage, initialState)
     const [chat, setChat] = useState<{ role: string; content: string }[]>([]);
+    const [fileName, setFileName] = useState("")
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     useEffect(() => {
         if (!state) return;
 
@@ -48,9 +50,25 @@ const Form = ({ selectedModel }: { selectedModel: string }) => {
                 ))}
                 <div ref={bottomRef} />
             </div>
-            <form action={formAction} className="flex">
-                <Input type='hidden' name='model' value={selectedModel} /> 
+            <form action={formAction} className="flex" encType='multipart/form-data'>
+                <Input type='hidden' name='model' value={selectedModel} />
+
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                    <PlusCircle size={18} className="mr-1" />
+                    {fileName || "Upload"}
+                </Button>
+
                 <Input type="text" placeholder="Enter your prompt" name="message" />
+
+                <input
+                    ref={fileInputRef}
+                    id="file"
+                    name="file"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
+                />
                 <Button type="submit" variant="outline">
                     <Send />
                 </Button>
