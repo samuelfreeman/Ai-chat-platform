@@ -1,5 +1,4 @@
 "use server"
-
 import ollama from 'ollama'
 import path from "path";
 import { writeFile } from "fs/promises";
@@ -40,3 +39,5 @@ export async function fetchModels() {
         console.log("Models fetched:", models);
         return models;
 }
+
+//Todo : save chat history , create a title from chat history 
