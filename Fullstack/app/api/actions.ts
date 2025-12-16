@@ -9,15 +9,15 @@ export async function sendMessage(initialState: any, formData: FormData) {
         console.log("File received:", file);
         let imagePath: string | null = null;
 
-            if (file) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        if (file) {
+                const bytes = await file.arrayBuffer();
+                const buffer = Buffer.from(bytes);
 
-        imagePath = path.join("/tmp", file.name); // safe upload location
-        await writeFile(imagePath, buffer);
+                imagePath = path.join("/tmp", file.name); // safe upload location
+                await writeFile(imagePath, buffer);
 
-        console.log("Saved image to:", imagePath);
-    }
+                console.log("Saved image to:", imagePath);
+        }
         const response = await ollama.chat({
                 model: model || "gpt-oss:120b-cloud",
                 messages: [
@@ -26,7 +26,7 @@ export async function sendMessage(initialState: any, formData: FormData) {
                                 content: `keep all responses for this message ${message} not more than 3 sentences, 8 words long each.`,
 
 
-                                images: imagePath ? [imagePath] :[]
+                                images: imagePath ? [imagePath] : []
                         },
                 ],
 
@@ -41,3 +41,21 @@ export async function fetchModels() {
 }
 
 //Todo : save chat history , create a title from chat history 
+
+export async function createTitle(model: string) {
+        const data = await ollama.chat({
+                model: model || "gpt-oss:120b-cloud",
+                messages: [{ role: "user", content: "create a short title from the  current conversation " }]
+        })
+        return { response: data.message.content }
+}
+
+
+
+export async function save_chat_history() {
+// TODO : implement a function to save chat history
+}
+
+export async function retrieve_chat_history(){
+// TODO : implement a function to retrieve chat history        
+}
