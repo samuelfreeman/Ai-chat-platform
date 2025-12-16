@@ -2,6 +2,7 @@
 import ollama from 'ollama'
 import path from "path";
 import { writeFile } from "fs/promises";
+import type {message} from '@/hooks/persist-chat-hook'
 export async function sendMessage(initialState: any, formData: FormData) {
         const message = formData.get("message")?.toString();
         const model = formData.get("model")?.toString();
@@ -23,7 +24,7 @@ export async function sendMessage(initialState: any, formData: FormData) {
                 messages: [
                         {
                                 role: "user",
-                                content: `keep all responses for this message ${message} not more than 3 sentences, 8 words long each.`,
+                                content: `keep all responses for this user message which says " ${message} " not more than 3 sentences, 8 words long each.`,
 
 
                                 images: imagePath ? [imagePath] : []
@@ -41,13 +42,38 @@ export async function fetchModels() {
 }
 
 //Todo : save chat history , create a title from chat history 
+export async function createTitle(messages: message[], model: string) {
+  const conversation = messages
+    .map(m => `${m.role}: ${m.content}`)
+    .join("\n");
 
-export async function createTitle(model: string) {
-        const data = await ollama.chat({
-                model: model || "gpt-oss:120b-cloud",
-                messages: [{ role: "user", content: "create a short title from the  current conversation " }]
-        })
-        return { response: data.message.content }
+  const data = await ollama.chat({
+    model: model || "gpt-oss:120b-cloud",
+    messages: [
+      {
+        role: "system",
+        content: "You generate concise chat titles."
+      },
+      {
+        role: "user",
+        content: `
+Create a very short title (max 5 words) that summarizes the conversation below.
+
+Rules:
+- No quotes
+- No punctuation
+- No markdown
+- No explanations
+- Return ONLY the title
+
+Conversation:
+${conversation}
+        `.trim()
+      }
+    ],
+  });
+
+  return { response: data.message.content.trim() };
 }
 
 
